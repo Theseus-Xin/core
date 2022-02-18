@@ -590,6 +590,7 @@ export function setupComponent(
   initProps(instance, props, isStateful, isSSR)
   initSlots(instance, children)
 
+  // 如果组件有状态，执行状态初始化过程，并返回setup选项的返回值。
   const setupResult = isStateful
     ? setupStatefulComponent(instance, isSSR)
     : undefined
@@ -637,7 +638,9 @@ function setupStatefulComponent(
   }
   // 2. call setup()
   const { setup } = Component
+  // 如果用户设置了setup函数
   if (setup) {
+    // 创建了setup函数的上下文对象
     const setupContext = (instance.setupContext =
       setup.length > 1 ? createSetupContext(instance) : null)
 

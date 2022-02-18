@@ -1183,6 +1183,7 @@ function baseCreateRenderer(
     }
   }
 
+  // 将传入初始化虚拟dom转为dom追加到container
   const mountComponent: MountComponentFn = (
     initialVNode,
     container,
@@ -1196,6 +1197,7 @@ function baseCreateRenderer(
     // mounting
     const compatMountInstance =
       __COMPAT__ && initialVNode.isCompatRoot && initialVNode.component
+    // 创建一个组件实例，实际上是根组件实例
     const instance: ComponentInternalInstance =
       compatMountInstance ||
       (initialVNode.component = createComponentInstance(
@@ -1223,6 +1225,7 @@ function baseCreateRenderer(
       if (__DEV__) {
         startMeasure(instance, `init`)
       }
+      // 组件的初始化，等效于，_init()
       setupComponent(instance)
       if (__DEV__) {
         endMeasure(instance, `init`)
@@ -1303,6 +1306,8 @@ function baseCreateRenderer(
     isSVG,
     optimized
   ) => {
+    // 组件更新函数，数据发生变化，应该如何更新
+    // 对patch进行了调用，在调用朱勇之前，会获取渲染函数的结果，当前组件的vnode。在首次执行渲染函数时，已经建立了依赖关系。
     const componentUpdateFn = () => {
       if (!instance.isMounted) {
         let vnodeHook: VNodeHook | null | undefined
@@ -1479,16 +1484,20 @@ function baseCreateRenderer(
         if (__DEV__) {
           startMeasure(instance, `render`)
         }
+
+        // 获取最难的vnode
         const nextTree = renderComponentRoot(instance)
         if (__DEV__) {
           endMeasure(instance, `render`)
         }
+        // 获取缓存的old Vnode
         const prevTree = instance.subTree
         instance.subTree = nextTree
 
         if (__DEV__) {
           startMeasure(instance, `patch`)
         }
+        // 执行diff 算法
         patch(
           prevTree,
           nextTree,
@@ -1542,12 +1551,14 @@ function baseCreateRenderer(
     }
 
     // create reactive effect for rendering
+    // 为组件的渲染创建一个响应式的副作用函数
     const effect = (instance.effect = new ReactiveEffect(
-      componentUpdateFn,
-      () => queueJob(instance.update),
+      componentUpdateFn, // 执行函数
+      () => queueJob(instance.update), // scheduler
       instance.scope // track it in component's effect scope
     ))
 
+    // 前面被queueJob的是effect.run.bind(effect) as SchedulerJob
     const update = (instance.update = effect.run.bind(effect) as SchedulerJob)
     update.id = instance.uid
     // allowRecurse
