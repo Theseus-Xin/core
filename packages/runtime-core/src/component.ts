@@ -631,6 +631,7 @@ function setupStatefulComponent(
   // 0. create render proxy property access cache
   instance.accessCache = Object.create(null)
   // 1. create public instance / render proxy
+  // 创建一个公共实例/渲染函数的代理
   // also mark it raw so it's never observed
   instance.proxy = markRaw(new Proxy(instance.ctx, PublicInstanceProxyHandlers))
   if (__DEV__) {
@@ -644,8 +645,10 @@ function setupStatefulComponent(
     const setupContext = (instance.setupContext =
       setup.length > 1 ? createSetupContext(instance) : null)
 
+      // 设置当前组件实例对象，配合getCurrentInstance使用
     setCurrentInstance(instance)
     pauseTracking()
+    // 调用setup函
     const setupResult = callWithErrorHandling(
       setup,
       instance,
@@ -678,6 +681,8 @@ function setupStatefulComponent(
         )
       }
     } else {
+      // 如果setup函数返回的结果不是一个promise
+      // 则执行结果处理函
       handleSetupResult(instance, setupResult, isSSR)
     }
   } else {
@@ -690,6 +695,8 @@ export function handleSetupResult(
   setupResult: unknown,
   isSSR: boolean
 ) {
+  // 判断返回的结果是不是函数
+  // 如果是，作为render函数处理
   if (isFunction(setupResult)) {
     // setup returned an inline render function
     if (__SSR__ && (instance.type as ComponentOptions).__ssrInlineRender) {
@@ -711,6 +718,8 @@ export function handleSetupResult(
     if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
       instance.devtoolsRawSetupState = setupResult
     }
+    // 转换为setupResult这个对象为响应式对象
+    // 将来组件渲染函数首先会先从setupState里面去获取
     instance.setupState = proxyRefs(setupResult)
     if (__DEV__) {
       exposeSetupStateOnRenderContext(instance)
@@ -722,6 +731,8 @@ export function handleSetupResult(
       }`
     )
   }
+  // 最后依然要执行组件安装
+  // 里面主要处理其他的options API
   finishComponentSetup(instance, isSSR)
 }
 
@@ -817,6 +828,7 @@ export function finishComponentSetup(
   }
 
   // support for 2.x options
+  // 支持Vue2的options API
   if (__FEATURE_OPTIONS_API__ && !(__COMPAT__ && skipOptions)) {
     setCurrentInstance(instance)
     pauseTracking()
@@ -902,7 +914,9 @@ export function createSetupContext(
       expose
     })
   } else {
+    // 返回的就是setupContext
     return {
+      // 只读的attrs
       get attrs() {
         return attrs || (attrs = createAttrsProxy(instance))
       },
