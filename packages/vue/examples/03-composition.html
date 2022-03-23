@@ -1,6 +1,7 @@
 <div id="app">
   <h1>vue3 Componsition</h1>
   <p>{{counter}}</p>
+  <p>{{counter2}}</p>
   <comp></comp>
 </div>
 <script src="../dist/vue.global.js"></script>
@@ -26,14 +27,37 @@
     //     this.counter++
     //   }, 1000)
     // },
-    setup (props, { emit, slots, attrs, expose }) {
+    setup(props, {
+      emit,
+      slots,
+      attrs,
+      expose
+    }) {
       const counter = Vue.ref(0)
+      let timer
       Vue.onMounted(() => {
-        setInterval(() => {
+        timer = setInterval(() => {
           counter.value++
         }, 1000)
       })
-      return { counter }
+      Vue.onUnmounted(() => {
+        clearInterval(timer)
+      })
+
+
+      const counter2 = Vue.ref(10)
+      Vue.onMounted(() => {
+        setInterval(() => {
+          counter2.value++
+        }, 1000);
+        setTimeout(() => {
+          counter2.value = 10
+        }, 10000);
+      })
+      return {
+        counter,
+        counter2
+      }
     }
   })
   // 变化2：实例方法

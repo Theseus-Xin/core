@@ -1,0 +1,32 @@
+<div id="app">
+  <h1>vue3 Reactivity</h1>
+  <p>{{state.counter}}</p>
+</div>
+<script src="../dist/vue.global.js"></script>
+<script>
+  // vue2 new Vue({})
+  // 变化1：函数创建实例
+  // vue3：createApp()
+  const app = Vue.createApp({
+    setup(props, {
+      emit,
+      slots,
+      attrs,
+      expose
+    }) {
+      const state = Vue.reactive({
+        counter: 1
+      })
+      Vue.onMounted(() => {
+        timer = setInterval(() => {
+          state.counter++
+        }, 1000)
+      })
+
+      return {
+        state
+      }
+    }
+  })
+  app.mount('#app')
+</script>
