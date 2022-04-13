@@ -198,12 +198,13 @@ function doWatch(
         `a reactive object, or an array of these types.`
     )
   }
-
+  // 获取当前组件实例
   const instance = currentInstance
   let getter: () => any
   let forceTrigger = false
   let isMultiSource = false
 
+  // 根据传入的source的不同类型做不同的操作
   if (isRef(source)) {
     getter = () => source.value
     forceTrigger = isShallow(source)
@@ -297,12 +298,15 @@ function doWatch(
   }
 
   let oldValue = isMultiSource ? [] : INITIAL_WATCHER_VALUE
+  // 创建计划任务
   const job: SchedulerJob = () => {
     if (!effect.active) {
       return
     }
     if (cb) {
       // watch(source, cb)
+      // 立刻调用，如果设置的cb回调函数，立刻调用副作用函数，立刻获取watch的响应式变量的值
+      // 这是观察响应式数据的最新值
       const newValue = effect.run()
       if (
         deep ||
@@ -339,6 +343,7 @@ function doWatch(
   job.allowRecurse = !!cb
 
   let scheduler: EffectScheduler
+  // 根据用户传递的eatchOptions决定如何flushCb
   if (flush === 'sync') {
     scheduler = job as any // the scheduler function gets called directly
   } else if (flush === 'post') {
@@ -364,6 +369,7 @@ function doWatch(
   }
 
   // initial run
+  // 是否在初始化的时候运行cb
   if (cb) {
     if (immediate) {
       job()

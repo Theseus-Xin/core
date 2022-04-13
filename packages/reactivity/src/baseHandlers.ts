@@ -114,7 +114,9 @@ function createGetter(isReadonly = false, shallow = false) {
       return res
     }
 
+    // 如果不是只读的
     if (!isReadonly) {
+      // 建立target，key 和 依赖函数之间的关系
       track(target, TrackOpTypes.GET, key)
     }
 

@@ -38,6 +38,7 @@ export function trackRefValue(ref: RefBase<any>) {
         key: 'value'
       })
     } else {
+      // 为ref实例创建一个依赖，dep是一个有ReactiveEffect构成的Set,真正的依赖收集
       trackEffects(ref.dep || (ref.dep = createDep()))
     }
   }
@@ -64,6 +65,7 @@ export function isRef(r: any): r is Ref {
   return !!(r && r.__v_isRef === true)
 }
 
+// 接收单值，返回一个包装 Ref<T>
 export function ref<T extends object>(
   value: T
 ): [T] extends [Ref] ? T : Ref<UnwrapRef<T>>
@@ -105,6 +107,7 @@ class RefImpl<T> {
     this._value = __v_isShallow ? value : toReactive(value)
   }
 
+  // 依赖跟踪
   get value() {
     trackRefValue(this)
     return this._value
@@ -115,6 +118,7 @@ class RefImpl<T> {
     if (hasChanged(newVal, this._rawValue)) {
       this._rawValue = newVal
       this._value = this.__v_isShallow ? newVal : toReactive(newVal)
+      // 触发副作用
       triggerRefValue(this, newVal)
     }
   }
